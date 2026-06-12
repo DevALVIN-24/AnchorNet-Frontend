@@ -40,19 +40,28 @@ cp .env.example .env.local
 
 ## Pages
 
-- `/` – landing page with an overview and a link to the dashboard
-- `/dashboard` – live liquidity dashboard:
-  - summary stats (assets, total liquidity, anchor positions)
-  - a table of aggregated pools with loading / error / empty states
-  - a routing **quote form** that previews fees, deliverable amount, and route
+- `/` – landing page with an overview and links to each section
+- `/dashboard` – live metrics bar (auto-refreshing), aggregated pools, and a
+  routing **quote form** that previews fees, deliverable amount, and route
+- `/anchors` – register, list and deactivate liquidity anchors
+- `/settlements` – open settlements and execute / cancel pending ones
+
+A mock **wallet connect** lives in the header (a stand-in for a real Stellar
+wallet integration).
 
 ### Structure
 
 ```
-src/app/         routes (landing, dashboard)
-src/components/   UI (Card, StatCard, PoolTable, PoolsPanel, QuoteForm, SiteHeader)
-src/lib/          types, formatting helpers, API client
+src/app/        routes (landing, dashboard, anchors, settlements)
+src/components/  UI (Card, tables, forms, panels, badges, wallet, header/footer)
+src/hooks/       useAsync, useInterval, useWallet
+src/lib/         types, formatting, API clients (liquidity, anchors, settlements, metrics)
 ```
+
+## Testing
+
+Unit tests run with [Vitest](https://vitest.dev) over the `src/lib` helpers and
+API clients (`npm test`). Lint and build are separate CI steps.
 
 ## Scripts
 
@@ -62,7 +71,7 @@ src/lib/          types, formatting helpers, API client
 | `npm run build` | Production build |
 | `npm start` | Run production server |
 | `npm run lint` | Run ESLint |
-| `npm run test` | Run lint (used in CI) |
+| `npm run test` | Run unit tests (Vitest) |
 
 ## Contributing
 
