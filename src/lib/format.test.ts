@@ -1,5 +1,11 @@
 import { describe, it, expect } from "vitest";
-import { formatAmount, pluralize, feeInBps } from "./format";
+import {
+  formatAmount,
+  pluralize,
+  feeInBps,
+  formatStatus,
+  formatDate,
+} from "./format";
 
 describe("formatAmount", () => {
   it("adds thousands separators", () => {
@@ -29,5 +35,23 @@ describe("feeInBps", () => {
 
   it("guards against a zero amount", () => {
     expect(feeInBps(0, 0)).toBe("0 bps");
+  });
+});
+
+describe("formatStatus", () => {
+  it("capitalizes the status", () => {
+    expect(formatStatus("pending")).toBe("Pending");
+    expect(formatStatus("executed")).toBe("Executed");
+  });
+});
+
+describe("formatDate", () => {
+  it("formats an ISO timestamp to a short date", () => {
+    expect(formatDate("2024-03-15T12:34:56.000Z")).toBe("2024-03-15");
+  });
+
+  it("returns a dash for empty or invalid input", () => {
+    expect(formatDate("")).toBe("—");
+    expect(formatDate("not-a-date")).toBe("—");
   });
 });

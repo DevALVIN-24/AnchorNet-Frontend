@@ -19,3 +19,17 @@ export function feeInBps(fee: number, amount: number): string {
   if (amount <= 0) return "0 bps";
   return `${Math.round((fee / amount) * 10_000)} bps`;
 }
+
+/** Capitalizes a settlement status for display (e.g. "pending" -> "Pending"). */
+export function formatStatus(status: string): string {
+  if (status.length === 0) return status;
+  return status[0].toUpperCase() + status.slice(1);
+}
+
+/** Formats an ISO timestamp as a short date, or "—" if absent/invalid. */
+export function formatDate(iso: string): string {
+  if (!iso) return "—";
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return "—";
+  return date.toISOString().slice(0, 10);
+}
