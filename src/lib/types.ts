@@ -36,3 +36,35 @@ export interface Quote {
 export interface ApiErrorBody {
   error: { code: string; message: string };
 }
+
+/** A registered liquidity-providing anchor. */
+export interface Anchor {
+  id: string;
+  name: string;
+  registeredAt: string;
+  active: boolean;
+}
+
+/** Lifecycle state of a settlement. */
+export type SettlementStatus = "pending" | "executed" | "cancelled";
+
+/** A cross-anchor settlement drawing on pool liquidity. */
+export interface Settlement {
+  id: number;
+  anchor: string;
+  asset: string;
+  amount: number;
+  fee: number;
+  status: SettlementStatus;
+  createdAt: string;
+}
+
+/** Aggregate network metrics. */
+export interface Metrics {
+  anchors: number;
+  activeAnchors: number;
+  pools: number;
+  totalLiquidity: number;
+  settlements: number;
+  pendingSettlements: number;
+}
