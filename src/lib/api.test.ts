@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { fetchPools, requestQuote, ApiRequestError } from "./api";
+import { fetchPools, requestQuote, apiRequest, ApiRequestError } from "./api";
 
 function mockFetch(status: number, body: unknown) {
   return vi.fn().mockResolvedValue({
@@ -12,6 +12,32 @@ function mockFetch(status: number, body: unknown) {
 
 afterEach(() => {
   vi.unstubAllGlobals();
+});
+
+describe("apiRequest", () => {
+  it("sets a JSON content-type when a body is present", async () => {
+    const fn = mockFetch(200, {});
+    vi.stubGlobal("fetch", fn);
+
+    await apiRequest("/x", { method: "POST", body: JSON.stringify({ a: 1 }) });
+
+    const init = fn.mock.calls[0][1] as RequestInit;
+    expect((init.headers as Record<string, string>)["Content-Type"]).toBe(
+      "application/json",
+    );
+  });
+
+  it("throws ApiRequestError carrying the error code", async () => {
+    vi.stubGlobal(
+      "fetch",
+      mockFetch(400, { error: { code: "BAD_REQUEST", message: "nope" } }),
+    );
+
+    await expect(apiRequest("/x")).rejects.toMatchObject({
+      code: "BAD_REQUEST",
+      status: 400,
+    });
+  });
 });
 
 describe("fetchPools", () => {
