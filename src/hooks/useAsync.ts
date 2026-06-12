@@ -16,14 +16,18 @@ export type AsyncState<T> =
 export function useAsync<T>(load: (signal: AbortSignal) => Promise<T>): {
   state: AsyncState<T>;
   reload: () => void;
+  refresh: () => void;
 } {
   const [state, setState] = useState<AsyncState<T>>({ status: "loading" });
   const [nonce, setNonce] = useState(0);
 
+  // `reload` re-fetches and shows a loading state; `refresh` re-fetches
+  // silently, keeping the current data visible until the new data arrives.
   const reload = useCallback(() => {
     setState({ status: "loading" });
     setNonce((n) => n + 1);
   }, []);
+  const refresh = useCallback(() => setNonce((n) => n + 1), []);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -41,5 +45,5 @@ export function useAsync<T>(load: (signal: AbortSignal) => Promise<T>): {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nonce]);
 
-  return { state, reload };
+  return { state, reload, refresh };
 }

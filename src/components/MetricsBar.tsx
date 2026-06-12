@@ -3,15 +3,20 @@
 import { useCallback } from "react";
 import { fetchMetrics } from "@/lib/metricsApi";
 import { useAsync } from "@/hooks/useAsync";
+import { useInterval } from "@/hooks/useInterval";
 import { formatAmount } from "@/lib/format";
 import { StatCard } from "./StatCard";
 import { Card } from "./Card";
 import { Spinner } from "./Spinner";
 
-/** Top-of-page row of aggregate network metrics. */
+/** Refresh interval for live metrics, in milliseconds. */
+const REFRESH_MS = 15_000;
+
+/** Top-of-page row of aggregate network metrics, refreshed periodically. */
 export function MetricsBar() {
   const load = useCallback((signal: AbortSignal) => fetchMetrics(signal), []);
-  const { state } = useAsync(load);
+  const { state, refresh } = useAsync(load);
+  useInterval(refresh, REFRESH_MS);
 
   if (state.status === "loading") {
     return (
