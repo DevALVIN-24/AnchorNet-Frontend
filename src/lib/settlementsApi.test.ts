@@ -45,6 +45,49 @@ describe("settlementsApi", () => {
     expect(fn.mock.calls[0][0]).toContain("anchor=a");
   });
 
+  it("forwards page and pageSize as query params", async () => {
+    const fn = mockFetch(200, {
+      settlements: [settlement()],
+      pagination: { page: 2, pageSize: 5, total: 11, totalPages: 3 },
+    });
+    vi.stubGlobal("fetch", fn);
+
+    await fetchSettlements({ page: 2, pageSize: 5 });
+    const url = fn.mock.calls[0][0] as string;
+    expect(url).toContain("page=2");
+    expect(url).toContain("pageSize=5");
+  });
+
+  it("returns pagination metadata alongside the settlements", async () => {
+    vi.stubGlobal(
+      "fetch",
+      mockFetch(200, {
+        settlements: [settlement()],
+        pagination: { page: 1, pageSize: 20, total: 42, totalPages: 3 },
+      }),
+    );
+
+    const result = await fetchSettlements();
+    expect(result.pagination).toEqual({
+      page: 1,
+      pageSize: 20,
+      total: 42,
+      totalPages: 3,
+    });
+  });
+
+  it("omits query params entirely when no options are given", async () => {
+    const fn = mockFetch(200, {
+      settlements: [],
+      pagination: { page: 1, pageSize: 20, total: 0, totalPages: 1 },
+    });
+    vi.stubGlobal("fetch", fn);
+
+    await fetchSettlements();
+    const url = fn.mock.calls[0][0] as string;
+    expect(url.endsWith("/api/v1/settlements")).toBe(true);
+  });
+
   it("opens a settlement", async () => {
     vi.stubGlobal("fetch", mockFetch(201, settlement()));
     const result = await openSettlement({
