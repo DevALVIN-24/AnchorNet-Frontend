@@ -6,6 +6,7 @@ import {
   registerAnchor,
   deregisterAnchor,
 } from "@/lib/anchorsApi";
+import { Anchor } from "@/lib/types";
 import { useAsync } from "@/hooks/useAsync";
 import { useToast } from "@/hooks/useToast";
 import { Card } from "./Card";
@@ -13,12 +14,32 @@ import { Spinner } from "./Spinner";
 import { AnchorForm } from "./AnchorForm";
 import { AnchorTable } from "./AnchorTable";
 
+type StatusFilter = "all" | "active" | "inactive";
+
+const FILTERS: { value: StatusFilter; label: string }[] = [
+  { value: "all", label: "All" },
+  { value: "active", label: "Active" },
+  { value: "inactive", label: "Inactive" },
+];
+
+/** Filters anchors by lifecycle status for the client-side status tabs. */
+function filterAnchors(anchors: Anchor[], filter: StatusFilter): Anchor[] {
+  return anchors.filter((anchor) => {
+    if (filter === "active") return anchor.active;
+    if (filter === "inactive") return !anchor.active;
+    return true;
+  });
+}
+
 /** Client panel for listing and managing anchors. */
 export function AnchorsPanel() {
   const load = useCallback((signal: AbortSignal) => fetchAnchors(signal), []);
   const { state, reload } = useAsync(load);
   const { notify } = useToast();
   const [pending, setPending] = useState(false);
+  const [filter, setFilter] = useState<StatusFilter>("all");
+  const filteredAnchors =
+    state.status === "ready" ? filterAnchors(state.data, filter) : [];
 
   async function register(input: { id: string; name?: string }) {
     setPending(true);
@@ -57,7 +78,36 @@ export function AnchorsPanel() {
         ) : state.status === "error" ? (
           <p className="text-sm text-red-400">{state.message}</p>
         ) : (
-          <AnchorTable anchors={state.data} onDeregister={deregister} />
+          <>
+            {state.data.length > 0 ? (
+              <div className="mb-3 flex items-center gap-2">
+                {FILTERS.map((f) => (
+                  <button
+                    key={f.value}
+                    onClick={() => setFilter(f.value)}
+                    aria-pressed={filter === f.value}
+                    className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+                      filter === f.value
+                        ? "bg-emerald-600 text-white"
+                        : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
+                    }`}
+                  >
+                    {f.label}
+                  </button>
+                ))}
+              </div>
+            ) : null}
+            {filteredAnchors.length === 0 && state.data.length > 0 ? (
+              <p className="py-6 text-center text-sm text-zinc-500">
+                No anchors match this filter.
+              </p>
+            ) : (
+              <AnchorTable
+                anchors={filteredAnchors}
+                onDeregister={deregister}
+              />
+            )}
+          </>
         )}
       </Card>
     </div>
