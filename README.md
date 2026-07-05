@@ -43,8 +43,18 @@ cp .env.example .env.local
 - `/` – landing page with an overview and links to each section
 - `/dashboard` – live metrics bar (auto-refreshing), aggregated pools, and a
   routing **quote form** that previews fees, deliverable amount, and route
-- `/anchors` – register, list and deactivate liquidity anchors
-- `/settlements` – open settlements and execute / cancel pending ones
+- `/anchors` – register, list and deactivate liquidity anchors, with
+  **status filter tabs** (All / Active / Inactive) over the fetched list
+- `/settlements` – open settlements and execute / cancel pending ones, with
+  a **"Load more" button** that pages through the API's `?page=`/`?pageSize=`
+  results instead of fetching everything up front
+
+Registering an anchor or opening a settlement is validated inline (missing or
+invalid fields are flagged next to the input before the request is sent), and
+every mutating action — register, deactivate, open, execute, cancel — reports
+success or failure via a **toast notification** in the bottom corner of the
+screen. Tables show an animated skeleton while their first page of data is
+loading, instead of a bare "Loading…" line.
 
 A mock **wallet connect** lives in the header (a stand-in for a real Stellar
 wallet integration).
@@ -53,9 +63,11 @@ wallet integration).
 
 ```
 src/app/        routes (landing, dashboard, anchors, settlements)
-src/components/  UI (Card, tables, forms, panels, badges, wallet, header/footer)
-src/hooks/       useAsync, useInterval, useWallet
-src/lib/         types, formatting, API clients (liquidity, anchors, settlements, metrics)
+src/components/  UI (Card, tables, forms with inline validation, skeleton
+                 loaders, panels, badges, toasts, wallet, header/footer)
+src/hooks/       useAsync, useInterval, useWallet, useToast
+src/lib/         types, formatting, toast stack helpers, API clients
+                 (liquidity, anchors, settlements, metrics)
 ```
 
 ## Testing
