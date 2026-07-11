@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Pool } from "@/lib/types";
 import { fetchPools } from "@/lib/api";
 import { formatAmount } from "@/lib/format";
+import { matchesQuery } from "@/lib/search";
 import { Card } from "./Card";
 import { StatCard } from "./StatCard";
 import { PoolTable } from "./PoolTable";
@@ -18,6 +19,7 @@ type LoadState =
 export function PoolsPanel() {
   const [state, setState] = useState<LoadState>({ status: "loading" });
   const [nonce, setNonce] = useState(0);
+  const [query, setQuery] = useState("");
 
   const reload = useCallback(() => {
     setState({ status: "loading" });
@@ -66,6 +68,9 @@ export function PoolsPanel() {
 
   const totalLiquidity = state.pools.reduce((sum, p) => sum + p.total, 0);
   const positions = state.pools.reduce((sum, p) => sum + p.anchors, 0);
+  const filteredPools = state.pools.filter((pool) =>
+    matchesQuery([pool.asset], query),
+  );
 
   return (
     <div className="space-y-6">
@@ -82,16 +87,33 @@ export function PoolsPanel() {
         />
       </div>
       <Card>
-        <div className="mb-3 flex items-center justify-between">
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
           <h2 className="text-sm font-semibold text-zinc-200">Pools</h2>
-          <button
-            onClick={reload}
-            className="rounded-lg px-2 py-1 text-xs text-zinc-400 hover:text-zinc-200"
-          >
-            Refresh
-          </button>
+          <div className="flex items-center gap-2">
+            {state.pools.length > 0 ? (
+              <input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search pools…"
+                aria-label="Search pools"
+                className="w-full max-w-40 rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-1.5 text-xs text-zinc-100 outline-none focus:border-zinc-600"
+              />
+            ) : null}
+            <button
+              onClick={reload}
+              className="rounded-lg px-2 py-1 text-xs text-zinc-400 hover:text-zinc-200"
+            >
+              Refresh
+            </button>
+          </div>
         </div>
-        <PoolTable pools={state.pools} />
+        {filteredPools.length === 0 && state.pools.length > 0 ? (
+          <p className="py-6 text-center text-sm text-zinc-500">
+            No pools match your search.
+          </p>
+        ) : (
+          <PoolTable pools={filteredPools} />
+        )}
       </Card>
     </div>
   );
