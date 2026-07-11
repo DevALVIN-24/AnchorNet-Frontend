@@ -1,5 +1,11 @@
-import { describe, it, expect } from "vitest";
-import { truncateAddress, mockAddress } from "./wallet";
+import { describe, it, expect, beforeEach } from "vitest";
+import {
+  truncateAddress,
+  mockAddress,
+  saveAccount,
+  loadAccount,
+  clearAccount,
+} from "./wallet";
 
 describe("truncateAddress", () => {
   it("shortens a long address", () => {
@@ -20,5 +26,36 @@ describe("mockAddress", () => {
 
   it("is deterministic for a given seed", () => {
     expect(mockAddress("anchorA")).toBe(mockAddress("anchorA"));
+  });
+});
+
+describe("wallet session persistence", () => {
+  beforeEach(() => {
+    window.localStorage.clear();
+  });
+
+  it("returns null when nothing has been saved", () => {
+    expect(loadAccount()).toBeNull();
+  });
+
+  it("round-trips a saved account", () => {
+    saveAccount({ address: mockAddress("anchornet-user") });
+    expect(loadAccount()).toEqual({ address: mockAddress("anchornet-user") });
+  });
+
+  it("clears the persisted account", () => {
+    saveAccount({ address: mockAddress("anchornet-user") });
+    clearAccount();
+    expect(loadAccount()).toBeNull();
+  });
+
+  it("ignores malformed persisted data", () => {
+    window.localStorage.setItem("anchornet:wallet", "not json");
+    expect(loadAccount()).toBeNull();
+  });
+
+  it("ignores persisted data missing an address", () => {
+    window.localStorage.setItem("anchornet:wallet", JSON.stringify({}));
+    expect(loadAccount()).toBeNull();
   });
 });
