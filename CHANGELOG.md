@@ -2,6 +2,22 @@
 
 All notable changes to the AnchorNet web app are documented here.
 
+## [0.4.0]
+
+### Added
+
+- **Detail pages:** `/anchors/[id]` and `/settlements/[id]`, showing full
+  record detail (status, dates, fees) with their own deactivate/execute/cancel
+  actions, linked from the anchors and settlements tables.
+- **API clients:** `fetchAnchor` and `fetchSettlement` single-record lookups
+  against `GET /api/v1/anchors/:id` and `GET /api/v1/settlements/:id`.
+- **Sorting:** a reusable `useSortableData` hook, and sortable Anchor / Amount
+  / Status columns on the settlements table.
+- **Tests:** component-level coverage with React Testing Library under a
+  jsdom Vitest environment (`StatusBadge`, `ToastProvider`,
+  `SettlementTable`), plus coverage for `useSortableData` and the new API
+  client methods.
+
 ## [0.3.0]
 
 ### Added
