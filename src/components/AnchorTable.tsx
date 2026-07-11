@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Anchor } from "@/lib/types";
 import { formatDate } from "@/lib/format";
 import { EmptyState } from "./EmptyState";
@@ -28,8 +29,15 @@ export function AnchorTable({
         {anchors.map((anchor) => (
           <tr key={anchor.id} className="border-b border-zinc-900">
             <td className="py-2">
-              <div className="text-zinc-100">{anchor.name}</div>
-              <div className="font-mono text-xs text-zinc-500">{anchor.id}</div>
+              <Link
+                href={`/anchors/${encodeURIComponent(anchor.id)}`}
+                className="block hover:underline"
+              >
+                <div className="text-zinc-100">{anchor.name}</div>
+                <div className="font-mono text-xs text-zinc-500">
+                  {anchor.id}
+                </div>
+              </Link>
             </td>
             <td className="py-2 text-zinc-400">
               {formatDate(anchor.registeredAt)}
