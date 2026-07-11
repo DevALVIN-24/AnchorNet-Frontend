@@ -76,4 +76,77 @@ describe("ConfirmDialog", () => {
     fireEvent.click(screen.getByText("Keep settlement"));
     expect(onCancel).toHaveBeenCalledTimes(1);
   });
+
+  it("autofocuses the cancel button when it opens", () => {
+    render(
+      <ConfirmDialog
+        open
+        title="t"
+        message="m"
+        onConfirm={() => {}}
+        onCancel={() => {}}
+      />,
+    );
+    expect(screen.getByText("Cancel")).toHaveFocus();
+  });
+
+  it("calls onCancel when Escape is pressed", () => {
+    const onCancel = vi.fn();
+    render(
+      <ConfirmDialog
+        open
+        title="t"
+        message="m"
+        onConfirm={() => {}}
+        onCancel={onCancel}
+      />,
+    );
+    fireEvent.keyDown(document, { key: "Escape" });
+    expect(onCancel).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not call onCancel for other keys", () => {
+    const onCancel = vi.fn();
+    render(
+      <ConfirmDialog
+        open
+        title="t"
+        message="m"
+        onConfirm={() => {}}
+        onCancel={onCancel}
+      />,
+    );
+    fireEvent.keyDown(document, { key: "Enter" });
+    expect(onCancel).not.toHaveBeenCalled();
+  });
+
+  it("traps Tab focus from the confirm button back to the cancel button", () => {
+    render(
+      <ConfirmDialog
+        open
+        title="t"
+        message="m"
+        onConfirm={() => {}}
+        onCancel={() => {}}
+      />,
+    );
+    screen.getByText("Confirm").focus();
+    fireEvent.keyDown(document, { key: "Tab" });
+    expect(screen.getByText("Cancel")).toHaveFocus();
+  });
+
+  it("traps Shift+Tab focus from the cancel button back to the confirm button", () => {
+    render(
+      <ConfirmDialog
+        open
+        title="t"
+        message="m"
+        onConfirm={() => {}}
+        onCancel={() => {}}
+      />,
+    );
+    screen.getByText("Cancel").focus();
+    fireEvent.keyDown(document, { key: "Tab", shiftKey: true });
+    expect(screen.getByText("Confirm")).toHaveFocus();
+  });
 });
