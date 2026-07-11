@@ -8,6 +8,7 @@ import { matchesQuery } from "@/lib/search";
 import { Card } from "./Card";
 import { StatCard } from "./StatCard";
 import { PoolTable } from "./PoolTable";
+import { PoolDistributionBar } from "./PoolDistributionBar";
 import { TableSkeleton } from "./TableSkeleton";
 
 type LoadState =
@@ -87,6 +88,9 @@ export function PoolsPanel() {
         />
       </div>
       <Card>
+        <div className="mb-4">
+          <PoolDistributionBar pools={state.pools} />
+        </div>
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
           <h2 className="text-sm font-semibold text-zinc-200">Pools</h2>
           <div className="flex items-center gap-2">
