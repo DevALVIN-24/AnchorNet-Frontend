@@ -1,0 +1,48 @@
+import { describe, it, expect } from "vitest";
+import { render, screen, fireEvent, within } from "@testing-library/react";
+import { SettlementTable } from "./SettlementTable";
+import { Settlement } from "@/lib/types";
+
+function settlement(overrides: Partial<Settlement>): Settlement {
+  return {
+    id: 1,
+    anchor: "a",
+    asset: "USDC",
+    amount: 0,
+    fee: 0,
+    status: "pending",
+    createdAt: "",
+    ...overrides,
+  };
+}
+
+const settlements: Settlement[] = [
+  settlement({ id: 1, amount: 300 }),
+  settlement({ id: 2, amount: 100 }),
+  settlement({ id: 3, amount: 200 }),
+];
+
+function amountCells() {
+  const rows = screen.getAllByRole("row").slice(1); // skip the header row
+  return rows.map((row) => within(row).getAllByRole("cell")[3].textContent);
+}
+
+describe("SettlementTable sorting", () => {
+  it("renders rows in their original order by default", () => {
+    render(<SettlementTable settlements={settlements} />);
+    expect(amountCells()).toEqual(["300", "100", "200"]);
+  });
+
+  it("sorts ascending by amount on the first click", () => {
+    render(<SettlementTable settlements={settlements} />);
+    fireEvent.click(screen.getByLabelText("Sort by Amount"));
+    expect(amountCells()).toEqual(["100", "200", "300"]);
+  });
+
+  it("sorts descending by amount on a second click", () => {
+    render(<SettlementTable settlements={settlements} />);
+    fireEvent.click(screen.getByLabelText("Sort by Amount"));
+    fireEvent.click(screen.getByLabelText("Sort by Amount"));
+    expect(amountCells()).toEqual(["300", "200", "100"]);
+  });
+});
