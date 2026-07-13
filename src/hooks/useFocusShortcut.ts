@@ -1,0 +1,31 @@
+"use client";
+
+import { RefObject, useEffect } from "react";
+
+/**
+ * Focuses `ref`'s element when `key` is pressed, unless focus is already
+ * inside a text input, textarea, or contenteditable element (so typing the
+ * key into another field doesn't hijack focus).
+ */
+export function useFocusShortcut(
+  key: string,
+  ref: RefObject<HTMLInputElement | null>,
+): void {
+  useEffect(() => {
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key !== key) return;
+
+      const target = event.target as HTMLElement | null;
+      const tag = target?.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || target?.isContentEditable) {
+        return;
+      }
+
+      event.preventDefault();
+      ref.current?.focus();
+    }
+
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [key, ref]);
+}
