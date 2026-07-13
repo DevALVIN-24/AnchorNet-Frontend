@@ -69,6 +69,19 @@ describe("SettlementsPanel", () => {
     expect(await screen.findByText("anchorA")).toBeInTheDocument();
   });
 
+  it("focuses the search box when / is pressed", async () => {
+    vi.mocked(fetchSettlements).mockResolvedValue(page([sample]));
+
+    renderPanel();
+    await screen.findByText("anchorA");
+
+    fireEvent.keyDown(document.body, { key: "/" });
+
+    expect(document.activeElement).toBe(
+      screen.getByLabelText("Search settlements"),
+    );
+  });
+
   it("filters the list via the search box", async () => {
     vi.mocked(fetchSettlements).mockResolvedValue(
       page([sample, { ...sample, id: 2, anchor: "other" }]),
