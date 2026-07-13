@@ -2,6 +2,22 @@
 
 All notable changes to the AnchorNet web app are documented here.
 
+## [0.7.0]
+
+### Added
+
+- **App:** a custom 404 `not-found` page with a link back home.
+- **UI:** a `CopyButton` component, wired into both detail pages next to
+  their address-like fields (anchor id, settlement anchor address).
+
+### Testing
+
+- Filled every remaining component/hook/lib test gap: `AnchorsPanel`,
+  `SettlementsPanel`, `PoolsPanel`, `AnchorDetail`, `SettlementDetail`,
+  `Card`, `ConnectButton`, `MetricsBar`, `QuoteForm`, `SiteFooter`,
+  `SiteHeader`, `WalletProvider`, `TableSkeleton`, `useAsync`, `useInterval`,
+  `useToast`, `useWallet`, and `metricsApi` all now have coverage.
+
 ## [0.6.0]
 
 ### Added
