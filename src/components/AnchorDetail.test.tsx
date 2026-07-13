@@ -1,0 +1,96 @@
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import {
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+  within,
+} from "@testing-library/react";
+import { AnchorDetail } from "./AnchorDetail";
+import { ToastProvider } from "./ToastProvider";
+import { fetchAnchor, deregisterAnchor } from "@/lib/anchorsApi";
+
+vi.mock("@/lib/anchorsApi", () => ({
+  fetchAnchor: vi.fn(),
+  deregisterAnchor: vi.fn(),
+}));
+
+beforeEach(() => {
+  vi.clearAllMocks();
+});
+
+function renderDetail(id = "anchorA") {
+  return render(
+    <ToastProvider>
+      <AnchorDetail id={id} />
+    </ToastProvider>,
+  );
+}
+
+describe("AnchorDetail", () => {
+  it("renders the anchor's fields once loaded", async () => {
+    vi.mocked(fetchAnchor).mockResolvedValue({
+      id: "anchorA",
+      name: "Anchor A",
+      registeredAt: "2026-01-01T00:00:00.000Z",
+      active: true,
+    });
+
+    renderDetail();
+
+    expect(await screen.findByText("Anchor A")).toBeInTheDocument();
+    expect(screen.getByText("Active")).toBeInTheDocument();
+  });
+
+  it("shows an error message when the anchor fails to load", async () => {
+    vi.mocked(fetchAnchor).mockRejectedValue(new Error("not found"));
+
+    renderDetail();
+
+    expect(await screen.findByText(/not found/i)).toBeInTheDocument();
+  });
+
+  it("hides the deactivate action for an already-inactive anchor", async () => {
+    vi.mocked(fetchAnchor).mockResolvedValue({
+      id: "anchorA",
+      name: "Anchor A",
+      registeredAt: "",
+      active: false,
+    });
+
+    renderDetail();
+    await screen.findByText("Anchor A");
+
+    expect(
+      screen.queryByRole("button", { name: "Deactivate" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("confirms before deactivating the anchor", async () => {
+    vi.mocked(fetchAnchor).mockResolvedValue({
+      id: "anchorA",
+      name: "Anchor A",
+      registeredAt: "",
+      active: true,
+    });
+    vi.mocked(deregisterAnchor).mockResolvedValue({
+      id: "anchorA",
+      name: "Anchor A",
+      registeredAt: "",
+      active: false,
+    });
+
+    renderDetail();
+    await screen.findByText("Anchor A");
+
+    fireEvent.click(screen.getByRole("button", { name: "Deactivate" }));
+    expect(deregisterAnchor).not.toHaveBeenCalled();
+
+    const dialog = screen.getByRole("alertdialog");
+    fireEvent.click(within(dialog).getByRole("button", { name: "Deactivate" }));
+
+    await waitFor(() =>
+      expect(deregisterAnchor).toHaveBeenCalledWith("anchorA"),
+    );
+  });
+});
