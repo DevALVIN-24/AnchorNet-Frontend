@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import {
   fetchAnchors,
   registerAnchor,
@@ -10,6 +10,7 @@ import { Anchor } from "@/lib/types";
 import { matchesQuery } from "@/lib/search";
 import { useAsync } from "@/hooks/useAsync";
 import { useToast } from "@/hooks/useToast";
+import { useFocusShortcut } from "@/hooks/useFocusShortcut";
 import { Card } from "./Card";
 import { TableSkeleton } from "./TableSkeleton";
 import { AnchorForm } from "./AnchorForm";
@@ -44,6 +45,8 @@ export function AnchorsPanel() {
   const [pendingDeregisterId, setPendingDeregisterId] = useState<
     string | null
   >(null);
+  const searchRef = useRef<HTMLInputElement>(null);
+  useFocusShortcut("/", searchRef);
   const filteredAnchors =
     state.status === "ready"
       ? filterAnchors(state.data, filter).filter((anchor) =>
@@ -106,9 +109,10 @@ export function AnchorsPanel() {
                   </button>
                 ))}
                 <input
+                  ref={searchRef}
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Search anchors…"
+                  placeholder="Search anchors… (/)"
                   aria-label="Search anchors"
                   className="ml-auto w-full max-w-48 rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-1.5 text-xs text-zinc-100 outline-none focus:border-zinc-600"
                 />
