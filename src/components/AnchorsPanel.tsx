@@ -136,7 +136,7 @@ export function AnchorsPanel() {
                 reason="no-results"
                 message="No anchors match your search or filter."
                 onClearFilters={() => {
-                  setFilter("all");
+                  setStatus("all");
                   setQuery("");
                 }}
               />
