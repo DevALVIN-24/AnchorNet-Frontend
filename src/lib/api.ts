@@ -37,7 +37,7 @@ export class ApiRequestError extends Error {
 }
 
 async function parseError(res: Response): Promise<ApiRequestError> {
-  const requestId = res.headers.get("x-request-id") ?? undefined;
+  const requestId = res.headers?.get("x-request-id") ?? undefined;
   try {
     const body = (await res.json()) as Partial<ApiErrorBody>;
     const code = body.error?.code ?? "UNKNOWN";
